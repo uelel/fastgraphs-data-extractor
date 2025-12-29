@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "Extract EPS and Div values from FastGraphs charts",
   "permissions": ["tabs", "activeTab", "clipboardWrite"],
-  "host_permissions": ["https://www.fastgraphs.com/*"],
+  "host_permissions": ["https://app.fastgraphs.com/*"],
   "content_scripts": [
     {
       "matches": ["https://app.fastgraphs.com/*"],
@@ -13,5 +13,10 @@
   ],
   "action": {
     "default_popup": "popup.html"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "fastgraphs-extractor@local"
+    }
   }
 }
