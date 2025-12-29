@@ -18,18 +18,18 @@ function extractFastGraphsData() {
 
       const EPS = rows[1].innerText.trim();
       const Div = rows[3].innerText.trim();
-
-      data.push({ date, EPS, Div });
+      
+      if (/^\d+.\d+$/.test(EPS) && /^\d+.\d+$/.test(Div)) {
+        data.push({ date, EPS, Div });
+      }
     });
 
   console.table(data);
 
-  if (data.length) {
-    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-    console.log("✅ Data copied to clipboard");
-  } else {
-    console.warn("❌ No data extracted");
-  }
+  ext.runtime.sendMessage({
+    type: "FASTGRAPHS_DATA",
+    payload: data
+  });
 }
 
 ext.runtime.onMessage.addListener((msg, sender) => {

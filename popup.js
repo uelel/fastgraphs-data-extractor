@@ -1,24 +1,33 @@
-const ext = typeof browser !== "undefined" ? browser : chrome;
+const ext = chrome;
 
 console.log("🧩 Popup script loaded");
 
+ext.runtime.onMessage.addListener(async (msg) => {
+  if (msg.type === "FASTGRAPHS_DATA") {
+    const data = msg.payload;
+
+    console.log("📊 Received data:", data);
+
+    if (!data.length) {
+      alert("No data found");
+      return;
+    }
+
+    await navigator.clipboard.writeText(
+      JSON.stringify(data, null, 2)
+    );
+
+    alert("EPS & Div data copied to clipboard");
+  }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("run").addEventListener("click", async () => {
-    try {
-      const tabs = await ext.tabs.query({
-        active: true,
-        currentWindow: true
-      });
+    const [tab] = await ext.tabs.query({
+      active: true,
+      currentWindow: true
+    });
 
-      if (!tabs.length) {
-        console.error("❌ No active tab");
-        return;
-      }
-
-      ext.tabs.sendMessage(tabs[0].id, "EXTRACT_FASTGRAPHS");
-      console.log("📤 Message sent to tab", tabs[0].id);
-    } catch (e) {
-      console.error("❌ Popup error:", e);
-    }
+    ext.tabs.sendMessage(tab.id, "EXTRACT_FASTGRAPHS");
   });
 });
