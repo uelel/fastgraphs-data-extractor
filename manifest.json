@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "FastGraphs.com Extractor",
+  "version": "1.0",
+  "description": "Extract EPS and Div values from FastGraphs charts",
+  "permissions": ["tabs", "activeTab", "clipboardWrite"],
+  "host_permissions": ["https://www.fastgraphs.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://app.fastgraphs.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
