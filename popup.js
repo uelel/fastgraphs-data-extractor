@@ -49,10 +49,10 @@ ext.runtime.onMessage.addListener(async (msg) => {
       return;
     }
 
-    // Convert to JSON format for now (will be refined based on actual data structure)
-    await navigator.clipboard.writeText(
-      JSON.stringify(data, null, 2)
-    );
+    // Convert to TSV format for Google Sheets
+    const tsvData = data.map(row => `${row.date}\t${row.PayoutRatio}`).join("\n");
+
+    await navigator.clipboard.writeText(tsvData);
 
     alert("Payout Ratio data copied to clipboard");
   }

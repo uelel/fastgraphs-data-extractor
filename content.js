@@ -2,13 +2,11 @@ const ext = typeof browser !== "undefined" ? browser : chrome;
 
 console.log("🧩 FastGraphs extension script loaded on this page");
 
-function extractEarningsPerShare() {
-  console.log("extractEarningsPerShare() called");
-
+function getEarningsPerShareData() {
   const data = [];
 
   document
-    .querySelectorAll("div.highcharts-xaxis-labels span table.fg-axis")
+    .querySelectorAll(".summary-hist-body div.highcharts-xaxis-labels span table.fg-axis")
     .forEach(table => {
       const rows = table.querySelectorAll("tr");
       if (rows.length !== 4) return;
@@ -19,9 +17,17 @@ function extractEarningsPerShare() {
       const EPS = rows[1].innerText.trim();
       
       if (/^\d+.\d+$/.test(EPS)) {
-        data.push({ date, EPS });
+        data.push({ date, EPS: parseFloat(EPS) });
       }
     });
+
+  return data;
+}
+
+function extractEarningsPerShare() {
+  console.log("extractEarningsPerShare() called");
+
+  const data = getEarningsPerShareData();
 
   console.table(data);
 
@@ -31,13 +37,11 @@ function extractEarningsPerShare() {
   });
 }
 
-function extractDividendsPerShare() {
-  console.log("extractDividendsPerShare() called");
-
+function getDividendsPerShareData() {
   const data = [];
 
   document
-    .querySelectorAll("div.highcharts-xaxis-labels span table.fg-axis")
+    .querySelectorAll(".summary-hist-body div.highcharts-xaxis-labels span table.fg-axis")
     .forEach(table => {
       const rows = table.querySelectorAll("tr");
       if (rows.length !== 4) return;
@@ -48,9 +52,17 @@ function extractDividendsPerShare() {
       const Div = rows[3].innerText.trim();
       
       if (/^\d+.\d+$/.test(Div)) {
-        data.push({ date, Div });
+        data.push({ date, Div: parseFloat(Div) });
       }
     });
+
+  return data;
+}
+
+function extractDividendsPerShare() {
+  console.log("extractDividendsPerShare() called");
+
+  const data = getDividendsPerShareData();
 
   console.table(data);
 
@@ -63,25 +75,20 @@ function extractDividendsPerShare() {
 function extractDividendPayoutRatio() {
   console.log("extractDividendPayoutRatio() called");
 
+  const epsData = getEarningsPerShareData();
+  const divData = getDividendsPerShareData();
+
+  // Create a map of EPS by date for quick lookup
+  const epsMap = new Map(epsData.map(item => [item.date, item.EPS]));
+
+  // Calculate payout ratio for dates where both EPS and Div exist
   const data = [];
-
-  // Find the markers for series 6
-  const markersGroup = document.querySelector(".summary-hist-body svg .highcharts-markers.highcharts-series-6");
-  if (!markersGroup) {
-    console.error("No .summary-hist-body svg .highcharts-markers.highcharts-series-6 element found");
-    ext.runtime.sendMessage({
-      type: "FASTGRAPHS_PAYOUT_RATIO_DATA",
-      payload: data
-    });
-    return;
-  }
-
-  // Extract all children
-  const children = markersGroup.children;
-  console.log(`Found ${children.length} children in markers group`);
-
-  Array.from(children).forEach((child, index) => {
-    // simulate mouse hover over these elements and extract payout ratio
+  divData.forEach(item => {
+    const eps = epsMap.get(item.date);
+    if (eps !== undefined && eps !== 0) {
+      const PayoutRatio = (item.Div / eps).toFixed(3);
+      data.push({ date: item.date, PayoutRatio });
+    }
   });
 
   console.table(data);
