@@ -12,7 +12,7 @@ function getEarningsPerShareData() {
       if (rows.length !== 4) return;
 
       const date = rows[0].innerText.trim();
-      if (!/^\d{2}\/\d{2}$/.test(date)) return;
+      if (!/^\d{1,2}\/\d{2}$/.test(date)) return;
 
       const EPS = rows[1].innerText.trim();
       
@@ -47,7 +47,7 @@ function getDividendsPerShareData() {
       if (rows.length !== 4) return;
 
       const date = rows[0].innerText.trim();
-      if (!/^\d{2}\/\d{2}$/.test(date)) return;
+      if (!/^\d{1,2}\/\d{2}$/.test(date)) return;
 
       const Div = rows[3].innerText.trim();
       
