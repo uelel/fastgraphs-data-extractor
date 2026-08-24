@@ -3,6 +3,17 @@ const ext = chrome;
 console.log("🧩 Popup script loaded");
 
 ext.runtime.onMessage.addListener(async (msg) => {
+  if (msg.type === "FASTGRAPHS_SECURITY_INFO") {
+    document.getElementById("securityName").textContent = msg.payload.name;
+    document.getElementById("securityTicker").textContent = msg.payload.ticker;
+    return;
+  }
+
+  if (msg.type === "FASTGRAPHS_ERROR") {
+    alert(msg.payload);
+    return;
+  }
+
   if (msg.type === "FASTGRAPHS_EPS_DATA") {
     const data = msg.payload;
 
@@ -58,7 +69,11 @@ ext.runtime.onMessage.addListener(async (msg) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const [tab] = await ext.tabs.query({ active: true, currentWindow: true });
+  
+  ext.tabs.sendMessage(tab.id, "GET_SECURITY_INFO");
+
   document.getElementById("extractEPS").addEventListener("click", async () => {
     const [tab] = await ext.tabs.query({
       active: true,

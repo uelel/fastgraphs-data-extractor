@@ -1,12 +1,28 @@
 const ext = typeof browser !== "undefined" ? browser : chrome;
 
+// selectors
+const HISTORICAL_CHART = ".summary-hist-body";
+const X_AXIS_LABELS = "div.highcharts-xaxis-labels span table.fg-axis";
+const SECURITY_NAME = "div.comp_base-info span.mat-headline-1:nth-of-type(1)";
+const SECURITY_TICKER = "div.comp_base-info span.mat-headline-1:nth-of-type(2)";
+
 console.log("🧩 FastGraphs extension script loaded on this page");
+
+function extractSecurityInfo() {
+  const name = document.querySelector(SECURITY_NAME)?.innerText.trim() ?? "";
+  const ticker = document.querySelector(SECURITY_TICKER)?.innerText.trim() ?? "";
+  ext.runtime.sendMessage({ type: "FASTGRAPHS_SECURITY_INFO", payload: { name, ticker } });
+}
+
+function isHistoricalChartPresent() {
+  return document.querySelector(HISTORICAL_CHART) !== null;
+}
 
 function getEarningsPerShareData() {
   const data = [];
 
   document
-    .querySelectorAll(".summary-hist-body div.highcharts-xaxis-labels span table.fg-axis")
+    .querySelectorAll(`${HISTORICAL_CHART} ${X_AXIS_LABELS}`)
     .forEach(table => {
       const rows = table.querySelectorAll("tr");
       if (rows.length !== 4) return;
@@ -41,7 +57,7 @@ function getDividendsPerShareData() {
   const data = [];
 
   document
-    .querySelectorAll(".summary-hist-body div.highcharts-xaxis-labels span table.fg-axis")
+    .querySelectorAll(`${HISTORICAL_CHART} ${X_AXIS_LABELS}`)
     .forEach(table => {
       const rows = table.querySelectorAll("tr");
       if (rows.length !== 4) return;
@@ -102,15 +118,20 @@ function extractDividendPayoutRatio() {
 ext.runtime.onMessage.addListener((msg, sender) => {
   console.log("📨 Message received in content script:", msg, sender);
 
-  if (msg === "EXTRACT_EPS") {
-    extractEarningsPerShare();
+  if (msg === "GET_SECURITY_INFO") {
+    extractSecurityInfo();
+    return;
   }
 
-  if (msg === "EXTRACT_DIV") {
-    extractDividendsPerShare();
+  if (!isHistoricalChartPresent()) {
+    ext.runtime.sendMessage({
+      type: "FASTGRAPHS_ERROR",
+      payload: "No historical graph was found. Make sure a security page is opened in your browser."
+    });
+    return;
   }
 
-  if (msg === "EXTRACT_PAYOUT_RATIO") {
-    extractDividendPayoutRatio();
-  }
+  if (msg === "EXTRACT_EPS") extractEarningsPerShare();
+  if (msg === "EXTRACT_DIV") extractDividendsPerShare();
+  if (msg === "EXTRACT_PAYOUT_RATIO") extractDividendPayoutRatio();
 });
