@@ -1,6 +1,6 @@
 # FastGraphs Data Extractor
 
-A simple Chrome extension that lets you copy financial data from [FastGraphs.com](https://www.fastgraphs.com) directly to your clipboard. It extracts data from the historical chart on the security summary pages.
+A simple Chrome extension that lets you copy financial data from FastGraphs.com directly to your clipboard. It extracts following data from the historical chart on the security summary pages:
 
 - **Earnings Per Share (EPS)**: historical EPS for all available dates
 - **Dividends Per Share**: historical dividend payments for all available dates
@@ -34,10 +34,7 @@ The extension is not published on the Chrome Web Store. Install it manually in d
 1. Log in to [app.fastgraphs.com](https://app.fastgraphs.com) with your subscription
 2. Open a stock page and wait for the chart to fully load
 3. Click the extension icon in the toolbar
-4. Click the button for the data you want to extract:
-  - **Extract Earnings per share**
-  - **Extract Dividends per share**
-  - **Extract Dividend Payout Ratio**
+4. Click the button for the data you want to extract.
 5. The data is copied to your clipboard. Paste it into a spreadsheet.
 
 ---
