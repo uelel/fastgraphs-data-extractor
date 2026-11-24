@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FastGraphs.com Data Extractor",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Extract data from FastGraphs charts",
   "permissions": ["tabs", "activeTab", "clipboardWrite"],
   "host_permissions": ["https://app.fastgraphs.com/*"],

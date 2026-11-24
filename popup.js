@@ -2,6 +2,15 @@ const ext = chrome;
 
 console.log("🧩 Popup script loaded");
 
+let statusTimer;
+function showStatus(text, type = "success") {
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.className = `fg-status fg-status-${type} fg-status-visible`;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => el.classList.remove("fg-status-visible"), 3000);
+}
+
 ext.runtime.onMessage.addListener(async (msg) => {
   if (msg.type === "FASTGRAPHS_SECURITY_INFO") {
     document.getElementById("securityName").textContent = msg.payload.name;
@@ -10,7 +19,7 @@ ext.runtime.onMessage.addListener(async (msg) => {
   }
 
   if (msg.type === "FASTGRAPHS_ERROR") {
-    alert(msg.payload);
+    showStatus(msg.payload, "error");
     return;
   }
 
@@ -20,7 +29,7 @@ ext.runtime.onMessage.addListener(async (msg) => {
     console.log("📊 Received EPS data:", data);
 
     if (!data.length) {
-      alert("No EPS data found");
+      showStatus("No EPS data found", "error");
       return;
     }
 
@@ -29,7 +38,7 @@ ext.runtime.onMessage.addListener(async (msg) => {
 
     await navigator.clipboard.writeText(tsvData);
 
-    alert("EPS data copied to clipboard");
+    showStatus("EPS data copied to clipboard");
   }
 
   if (msg.type === "FASTGRAPHS_DIV_DATA") {
@@ -38,7 +47,7 @@ ext.runtime.onMessage.addListener(async (msg) => {
     console.log("📊 Received Div data:", data);
 
     if (!data.length) {
-      alert("No Dividends data found");
+      showStatus("No Dividends data found", "error");
       return;
     }
 
@@ -47,7 +56,7 @@ ext.runtime.onMessage.addListener(async (msg) => {
 
     await navigator.clipboard.writeText(tsvData);
 
-    alert("Dividends data copied to clipboard");
+    showStatus("Dividends data copied to clipboard");
   }
 
   if (msg.type === "FASTGRAPHS_PAYOUT_RATIO_DATA") {
@@ -56,7 +65,7 @@ ext.runtime.onMessage.addListener(async (msg) => {
     console.log("📊 Received Payout Ratio data:", data);
 
     if (!data.length) {
-      alert("No Payout Ratio data found");
+      showStatus("No Payout Ratio data found", "error");
       return;
     }
 
@@ -65,7 +74,7 @@ ext.runtime.onMessage.addListener(async (msg) => {
 
     await navigator.clipboard.writeText(tsvData);
 
-    alert("Payout Ratio data copied to clipboard");
+    showStatus("Payout Ratio data copied to clipboard");
   }
 });
 

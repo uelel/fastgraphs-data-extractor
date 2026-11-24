@@ -9,6 +9,10 @@
       .fg-btn { background: #ffffff; color: #0b1f3a; }
       .fg-btn:hover { background: #0b1f3a; color: #ffffff; }
       .btn:hover { background: #0b1f3a !important; color: #ffffff !important; }
+      .fg-status { display: none; margin: 0 16px 16px; padding: 10px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+      .fg-status-visible { display: block; }
+      .fg-status-success { background: #e8f6ee; color: #1e7a46; border: 1px solid #b7e1c8; }
+      .fg-status-error { background: #fdecec; color: #b42318; border: 1px solid #f5c2c0; }
     </style>
   </head>
   <body>
@@ -43,6 +47,7 @@
           Extract Dividend Payout ratio
         </button>
       </div>
+      <div id="status" class="fg-status" role="status" aria-live="polite"></div>
   </div>
   <script src="popup.js"></script>
 </html>
