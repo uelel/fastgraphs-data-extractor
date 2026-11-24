@@ -1,25 +1,63 @@
 const ext = typeof browser !== "undefined" ? browser : chrome;
 
-// selectors
-const HISTORICAL_CHART = ".summary-hist-body";
-const X_AXIS_LABELS = "div.highcharts-xaxis-labels span table.fg-axis";
-const SECURITY_NAME = "div.comp_base-info span.mat-headline-1:nth-of-type(1)";
-const SECURITY_TICKER = "div.comp_base-info span.mat-headline-1:nth-of-type(2)";
+// selectors: "legacy" = app.fastgraphs.com, "modern" = www.fastgraphs.com
+const SELECTORS = {
+  legacy: {
+    HISTORICAL_CHART: ".summary-hist-body",
+    X_AXIS_LABELS: "div.highcharts-xaxis-labels span table.fg-axis",
+    SECURITY_NAME: "div.comp_base-info span.mat-headline-1:nth-of-type(1)",
+    SECURITY_TICKER: "div.comp_base-info span.mat-headline-1:nth-of-type(2)",
+  },
+  modern: {
+    HISTORICAL_CHART: ".historical-chart",
+    X_AXIS_LABELS: "div.highcharts-xaxis-labels span table.historical-chart__axis-label",
+    SECURITY_NAME: "h1.security-header__title span.security-header__title-text", // "Apple Inc. (AAPL)"
+  },
+};
 
 console.log("🧩 FastGraphs extension script loaded on this page");
 
+// Detected on every call: both frontends are SPAs that render late.
+function isModernFrontend() {
+  return (
+    document.querySelector(SELECTORS.modern.HISTORICAL_CHART) !== null ||
+    document.querySelector(SELECTORS.modern.SECURITY_NAME) !== null
+  );
+}
+
+function getSelectors() {
+  return isModernFrontend() ? SELECTORS.modern : SELECTORS.legacy;
+}
+
 function extractSecurityInfo() {
-  const name = document.querySelector(SECURITY_NAME)?.innerText.trim() ?? "";
-  const ticker = document.querySelector(SECURITY_TICKER)?.innerText.trim() ?? "";
+  let name = "";
+  let ticker = "";
+
+  if (isModernFrontend()) {
+    const text = document.querySelector(SELECTORS.modern.SECURITY_NAME)?.innerText.trim() ?? "";
+    const match = text.match(/^(.*?)\s*\(([^()]+)\)\s*$/);
+    if (match) {
+      name = match[1];
+      ticker = match[2].trim();
+    } else {
+      name = text;
+    }
+  } else {
+    name = document.querySelector(SELECTORS.legacy.SECURITY_NAME)?.innerText.trim() ?? "";
+    ticker = document.querySelector(SELECTORS.legacy.SECURITY_TICKER)?.innerText.trim() ?? "";
+  }
+
   ext.runtime.sendMessage({ type: "FASTGRAPHS_SECURITY_INFO", payload: { name, ticker } });
 }
 
 function isHistoricalChartPresent() {
-  return document.querySelector(HISTORICAL_CHART) !== null;
+  return document.querySelector(getSelectors().HISTORICAL_CHART) !== null;
 }
 
-function getEarningsPerShareData() {
-  const data = [];
+// Returns { date, rows } for each valid 4-row x-axis label table
+function getAxisRows() {
+  const { HISTORICAL_CHART, X_AXIS_LABELS } = getSelectors();
+  const result = [];
 
   document
     .querySelectorAll(`${HISTORICAL_CHART} ${X_AXIS_LABELS}`)
@@ -30,12 +68,22 @@ function getEarningsPerShareData() {
       const date = rows[0].innerText.trim();
       if (!/^\d{1,2}\/\d{2}$/.test(date)) return;
 
-      const EPS = rows[1].innerText.trim();
-      
-      if (/^\d+.\d+$/.test(EPS)) {
-        data.push({ date, EPS: parseFloat(EPS) });
-      }
+      result.push({ date, rows });
     });
+
+  return result;
+}
+
+function getEarningsPerShareData() {
+  const data = [];
+
+  getAxisRows().forEach(({ date, rows }) => {
+    const EPS = rows[1].innerText.trim();
+
+    if (/^\d+.\d+$/.test(EPS)) {
+      data.push({ date, EPS: parseFloat(EPS) });
+    }
+  });
 
   return data;
 }
@@ -56,21 +104,13 @@ function extractEarningsPerShare() {
 function getDividendsPerShareData() {
   const data = [];
 
-  document
-    .querySelectorAll(`${HISTORICAL_CHART} ${X_AXIS_LABELS}`)
-    .forEach(table => {
-      const rows = table.querySelectorAll("tr");
-      if (rows.length !== 4) return;
+  getAxisRows().forEach(({ date, rows }) => {
+    const Div = rows[3].innerText.trim();
 
-      const date = rows[0].innerText.trim();
-      if (!/^\d{1,2}\/\d{2}$/.test(date)) return;
-
-      const Div = rows[3].innerText.trim();
-      
-      if (/^\d+.\d+$/.test(Div)) {
-        data.push({ date, Div: parseFloat(Div) });
-      }
-    });
+    if (/^\d+.\d+$/.test(Div)) {
+      data.push({ date, Div: parseFloat(Div) });
+    }
+  });
 
   return data;
 }

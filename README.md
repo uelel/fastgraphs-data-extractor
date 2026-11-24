@@ -31,7 +31,7 @@ The extension is not published on the Chrome Web Store. Install it manually in d
 
 ## ⚡ Usage
 
-1. Log in to [app.fastgraphs.com](https://app.fastgraphs.com) with your subscription
+1. Log in to FastGraphs with your subscription. Both the new frontend ([www.fastgraphs.com](https://www.fastgraphs.com)) and the old one ([app.fastgraphs.com](https://app.fastgraphs.com)) are supported
 2. Open a stock page and wait for the chart to fully load
 3. Click the extension icon in the toolbar
 4. Click the button for the data you want to extract.
