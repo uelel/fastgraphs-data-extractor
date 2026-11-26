@@ -11,7 +11,7 @@ const SELECTORS = {
   modern: {
     HISTORICAL_CHART: ".historical-chart",
     X_AXIS_LABELS: "div.highcharts-xaxis-labels span table.historical-chart__axis-label",
-    SECURITY_NAME: "h1.security-header__title span.security-header__title-text", // "Apple Inc. (AAPL)"
+    SECURITY_NAME: "h1.security-header__title-text",
   },
 };
 
